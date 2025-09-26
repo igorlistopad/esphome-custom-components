@@ -1,23 +1,16 @@
-Custom Text Sensor
-==================
+# Custom Text Sensor
 
-.. seo::
-    :description: Instructions for setting up Custom C++ text sensors with ESPHome.
-    :image: language-cpp.svg
-    :keywords: C++, Custom
+> [!WARNING]
+> [Custom Components are deprecated][esphome-dev-removal-custom-components], not recommended for new configurations.
+> Please look at creating a real ESPHome component and "importing" it into your configuration with
+> [External Components][esphome-docs-external-components].
+>
+> You can find some basic documentation on creating your own components at [Developer site][esphome-dev].
 
-.. warning::
-
-    :ref:`Custom Components are deprecated<a_note_about_custom_components>`, not recommended for new configurations and
-    will be removed from ESPHome in the ``2025.1.0`` release. Please look at creating a real ESPHome component and
-    "importing" it into your configuration with :doc:`/components/external_components`.
-
-    You can find some basic documentation on creating your own components at :ref:`contributing_to_esphome`.
-
-.. warning::
-
-    While we try to keep the ESPHome YAML configuration options as stable as possible, the ESPHome API is less
-    stable. If something in the APIs needs to be changed in order for something else to work, we will do so.
+> [!WARNING]
+> While ESPHome developers try to keep the ESPHome YAML configuration options as stable as possible,
+> the ESPHome API is less stable. If something in the APIs needs to be changed in order for something else to work,
+> ESPHome developers will do so.
 
 This component can be used to create custom text sensors in ESPHome using the C++ (Arduino) API.
 
@@ -27,58 +20,66 @@ sensors are very similar to sensors internally.
 The example below is an example of a custom text sensor which constantly publishes
 the message "Hello World!".
 
-.. code-block:: cpp
+```cpp
+#include "esphome.h"
 
-    #include "esphome.h"
+class MyCustomTextSensor : public PollingComponent, public TextSensor {
+ public:
+  // constructor
+  MyCustomTextSensor() : PollingComponent(15000) {}
 
-    class MyCustomTextSensor : public PollingComponent, public TextSensor {
-     public:
-      // constructor
-      MyCustomTextSensor() : PollingComponent(15000) {}
+  void setup() override {
+    // This will be called by App.setup()
+  }
+  void update() override {
+    // This will be called every "update_interval" milliseconds.
+    // Publish state
+    publish_state("Hello World!");
+  }
+};
+```
 
-      void setup() override {
-        // This will be called by App.setup()
-      }
-      void update() override {
-        // This will be called every "update_interval" milliseconds.
-        // Publish state
-        publish_state("Hello World!");
-      }
-    };
-
-(Store this file in your configuration directory, for example ``my_text_sensor.h``)
+(Store this file in your configuration directory, for example `my_text_sensor.h`)
 
 And in YAML:
 
-.. code-block:: yaml
+```yaml
+# Example configuration entry
+esphome:
+  includes:
+    - my_text_sensor.h
 
-    # Example configuration entry
-    esphome:
-      includes:
-        - my_text_sensor.h
+external_components:
+  - source: github://igorlistopad/esphome-custom-components
+    components: [custom, custom_component]
 
-    text_sensor:
-    - platform: custom
-      lambda: |-
-        auto my_custom_sensor = new MyCustomTextSensor();
-        App.register_component(my_custom_sensor);
-        return {my_custom_sensor};
+text_sensor:
+  - platform: custom
+    lambda: |-
+      auto my_custom_sensor = new MyCustomTextSensor();
+      App.register_component(my_custom_sensor);
+      return {my_custom_sensor};
 
-      text_sensors:
-        name: "My Custom Text Sensor"
+    text_sensors:
+      - name: "My Custom Text Sensor"
+```
 
-Configuration variables:
+### Configuration variables:
 
-- **lambda** (**Required**, :ref:`lambda <config-lambda>`): The lambda to run for instantiating the
-  text sensor(s).
-- **text_sensors** (**Required**, list): A list of text sensors to initialize. The length here
-  must equal the number of items in the ``return`` statement of the ``lambda``.
+- **lambda** (**Required**, [lambda][esphome-docs-lambda]): The lambda to run for instantiating the text sensor(s).
+- **text_sensors** (**Required**, list): A list of text sensors to initialize.
+  The length here must equal the number of items in the `return` statement of the `lambda`.
+  - All options from [Text Sensor][esphome-docs-config-text-sensor].
 
-    - All options from :ref:`Text Sensor <config-text_sensor>`.
+## See Also
 
-See Also
---------
+- [Text Sensor Component][esphome-docs-text-sensor]
+- [API Reference][esphome-api-text-sensor]
 
-- :doc:`/components/text_sensor/index`
-- :apiclass:`API Reference <text_sensor::TextSensor>`
-- :ghedit:`Edit`
+[esphome-docs-lambda]: https://esphome.io/automations/templates/#config-lambda
+[esphome-docs-text-sensor]: https://esphome.io/components/text_sensor/
+[esphome-docs-config-text-sensor]: https://esphome.io/components/text_sensor/#config-text_sensor
+[esphome-docs-external-components]: https://esphome.io/components/external_components/
+[esphome-api-text-sensor]: https://api-docs.esphome.io/text__sensor_8h
+[esphome-dev]: https://developers.esphome.io
+[esphome-dev-removal-custom-components]: https://developers.esphome.io/blog/2025/02/19/about-the-removal-of-support-for-custom-components/

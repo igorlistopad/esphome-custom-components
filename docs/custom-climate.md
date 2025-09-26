@@ -1,105 +1,107 @@
-Custom Climate
-==============
+# Custom Climate
 
-.. seo::
-    :description: Instructions for setting up Custom C++ climate components with ESPHome.
-    :image: language-cpp.svg
-    :keywords: C++, Custom
+> [!WARNING]
+> [Custom Components are deprecated][esphome-dev-removal-custom-components], not recommended for new configurations.
+> Please look at creating a real ESPHome component and "importing" it into your configuration with
+> [External Components][esphome-docs-external-components].
+>
+> You can find some basic documentation on creating your own components at [Developer site][esphome-dev].
 
-.. warning::
-
-    :ref:`Custom Components are deprecated<a_note_about_custom_components>`, not recommended for new configurations and
-    will be removed from ESPHome in the ``2025.1.0`` release. Please look at creating a real ESPHome component and
-    "importing" it into your configuration with :doc:`/components/external_components`.
-
-    You can find some basic documentation on creating your own components at :ref:`contributing_to_esphome`.
-
-.. warning::
-
-    While we try to keep the ESPHome YAML configuration options as stable as possible, the ESPHome API is less
-    stable. If something in the APIs needs to be changed in order for something else to work, we will do so.
+> [!WARNING]
+> While ESPHome developers try to keep the ESPHome YAML configuration options as stable as possible,
+> the ESPHome API is less stable. If something in the APIs needs to be changed in order for something else to work,
+> ESPHome developers will do so.
 
 This component can be used to create custom climate devices in ESPHome using the C++ (Arduino) API.
 
-Please first read :doc:`/components/sensor/custom` guide, the same principles apply here.
+Please first read [Custom Sensor Component](custom-sensor.md) guide, the same principles apply here.
 
 The example below is an example of a custom climate device - all climate devices must override
-two methods (:apiclass:`Climate <climate::Climate>`):
+two methods ([Climate][esphome-api-class-climate]):
 
-- ``traits``: This should return a :apiclass:`ClimateTraits <climate::ClimateTraits>` object
-  representing the capabilities of the climate device.
-- ``control``: This receives a :apiclass:`ClimateCall <climate::ClimateCall>` object that contains
+- `traits`: This should return a [ClimateTraits][esphome-api-class-climate-traits] object representing
+  the capabilities of the climate device.
+- `control`: This receives a [ClimateCall][esphome-api-class-climate-call] object that contains
   the command the user tried to set.
 
-.. code-block:: cpp
+```cpp
+#include "esphome.h"
 
-    #include "esphome.h"
+class MyCustomClimate : public Component, public Climate {
+ public:
+  void setup() override {
+    // This will be called by App.setup()
+  }
+  void control(const ClimateCall &call) override {
+    if (call.get_mode().has_value()) {
+      // User requested mode change
+      ClimateMode mode = *call.get_mode();
+      // Send mode to hardware
+      // ..
+      // Publish updated state
+      this->mode = mode;
+      this->publish_state();
+    }
+    if (call.get_target_temperature().has_value()) {
+      // User requested target temperature change
+      float temp = *call.get_target_temperature();
+      // Send target temp to climate
+      // ...
+    }
+  }
+  ClimateTraits traits() override {
+    // The capabilities of the climate device
+    auto traits = climate::ClimateTraits();
+    traits.set_supports_current_temperature(true);
+    traits.set_supported_modes({climate::CLIMATE_MODE_HEAT_COOL});
+    return traits;
+  }
+};
+```
 
-    class MyCustomClimate : public Component, public Climate {
-     public:
-      void setup() override {
-        // This will be called by App.setup()
-      }
-      void control(const ClimateCall &call) override {
-        if (call.get_mode().has_value()) {
-          // User requested mode change
-          ClimateMode mode = *call.get_mode();
-          // Send mode to hardware
-          // ...
-
-          // Publish updated state
-          this->mode = mode;
-          this->publish_state();
-        }
-        if (call.get_target_temperature().has_value()) {
-          // User requested target temperature change
-          float temp = *call.get_target_temperature();
-          // Send target temp to climate
-          // ...
-        }
-      }
-      ClimateTraits traits() override {
-        // The capabilities of the climate device
-        auto traits = climate::ClimateTraits();
-        traits.set_supports_current_temperature(true);
-        traits.set_supported_modes({climate::CLIMATE_MODE_HEAT_COOL});
-        return traits;
-      }
-    };
-
-(Store this file in your configuration directory, for example ``my_climate.h``)
+(Store this file in your configuration directory, for example `my_climate.h`)
 
 And in YAML:
 
-.. code-block:: yaml
+```yaml
+# Example configuration entry
+esphome:
+  includes:
+    - my_climate.h
 
-    # Example configuration entry
-    esphome:
-      includes:
-        - my_climate.h
+external_components:
+  - source: github://igorlistopad/esphome-custom-components
+    components: [custom, custom_component]
 
-    climate:
-    - platform: custom
-      lambda: |-
-        auto my_custom_climate = new MyCustomClimate();
-        App.register_component(my_custom_climate);
-        return {my_custom_climate};
+climate:
+  - platform: custom
+    lambda: |-
+      auto my_custom_climate = new MyCustomClimate();
+      App.register_component(my_custom_climate);
+      return {my_custom_climate};
+    climates:
+      - name: "My Custom Climate"
+```
 
-      climates:
-        - name: "My Custom Climate"
+### Configuration variables:
 
-Configuration variables:
+- **lambda** (**Required**, [lambda][esphome-docs-lambda]): The lambda to run for instantiating the climate(s).
+- **climates** (**Required**, list): A list of climates to initialize.
+  The length here must equal the number of items in the `return` statement of the `lambda`.
+  - All options from [Climate][esphome-docs-config-climate].
 
-- **lambda** (**Required**, :ref:`lambda <config-lambda>`): The lambda to run for instantiating the
-  climate(s).
-- **climates** (**Required**, list): A list of climates to initialize. The length here
-  must equal the number of items in the ``return`` statement of the ``lambda``.
+## See Also
 
-  - All options from :ref:`Climate <config-climate>`.
+- [Climate Component][esphome-docs-climate]
+- [API Reference][esphome-api-climate]
 
-See :apiclass:`Climate <climate::Climate>`
-
-See Also
---------
-
-- :ghedit:`Edit`
+[esphome-docs-lambda]: https://esphome.io/automations/templates/#config-lambda
+[esphome-docs-climate]: https://esphome.io/components/climate/
+[esphome-docs-config-climate]: https://esphome.io/components/climate/#config-climate
+[esphome-docs-external-components]: https://esphome.io/components/external_components/
+[esphome-api-climate]: https://api-docs.esphome.io/climate_8h
+[esphome-api-class-climate]: https://api-docs.esphome.io/classesphome_1_1climate_1_1_climate
+[esphome-api-class-climate-traits]: https://api-docs.esphome.io/classesphome_1_1climate_1_1_climate_traits
+[esphome-api-class-climate-call]: https://api-docs.esphome.io/classesphome_1_1climate_1_1_climate_call
+[esphome-dev]: https://developers.esphome.io
+[esphome-dev-removal-custom-components]: https://developers.esphome.io/blog/2025/02/19/about-the-removal-of-support-for-custom-components/
