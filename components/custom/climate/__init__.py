@@ -1,17 +1,26 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import climate
-from esphome.const import CONF_ID, CONF_LAMBDA
+from esphome.const import (
+    CONF_ID,
+    CONF_LAMBDA,
+    __version__ as ESPHOME_VERSION,
+)
 from .. import custom_ns
 
 CustomClimateConstructor = custom_ns.class_("CustomClimateConstructor")
 CONF_CLIMATES = "climates"
 
+if cv.Version.parse(ESPHOME_VERSION) < cv.Version.parse("2025.5.0"):
+    climate_schema = climate.CLIMATE_SCHEMA
+else:
+    climate_schema = climate.climate_schema(climate.Climate)
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(CustomClimateConstructor),
         cv.Required(CONF_LAMBDA): cv.returning_lambda,
-        cv.Required(CONF_CLIMATES): cv.ensure_list(climate.CLIMATE_SCHEMA),
+        cv.Required(CONF_CLIMATES): cv.ensure_list(climate_schema),
     }
 )
 

@@ -1,17 +1,26 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import cover
-from esphome.const import CONF_ID, CONF_LAMBDA
+from esphome.const import (
+    CONF_ID,
+    CONF_LAMBDA,
+    __version__ as ESPHOME_VERSION,
+)
 from .. import custom_ns
 
 CustomCoverConstructor = custom_ns.class_("CustomCoverConstructor")
 CONF_COVERS = "covers"
+    
+if cv.Version.parse(ESPHOME_VERSION) < cv.Version.parse("2025.5.0"):
+    cover_schema = cover.COVER_SCHEMA
+else:
+    cover_schema = cover.cover_schema(cover.Cover)
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(CustomCoverConstructor),
         cv.Required(CONF_LAMBDA): cv.returning_lambda,
-        cv.Required(CONF_COVERS): cv.ensure_list(cover.COVER_SCHEMA),
+        cv.Required(CONF_COVERS): cv.ensure_list(cover_schema),
     }
 )
 
