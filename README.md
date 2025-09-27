@@ -1,23 +1,24 @@
 # ESPHome Custom Components
 
-Brings back support for `custom` and `custom_component` to ESPHome after removal of custom components from ESPHome
-in the 2025.2.0 release.
+Brings back support for `custom` and `custom_component` to ESPHome after removing **Custom Components** from ESPHome in
+the 2025.2.0 release.
 
-The custom components code hosted in this repository is a copy extracted from the [ESPHome][github-esphome] 2024.12.4
+The **Custom Components** code hosted in this repository is a copy extracted from the [ESPHome][github-esphome] 2024.12.4
 release.
 
-The code will be updated as needed to support new releases of the ESPHome.
+ⓘ The code will be updated as needed to support new releases of the ESPHome.
 
 > [!IMPORTANT]
-> This repository is created to support old projects using Custom Components, not recommended for new configurations.\
+> This repository is created to support old projects using Custom Components, not recommended for new configurations.
 > Please look at creating a real ESPHome component and "importing" it into your configuration with
 > [External Components][esphome-docs-external-components].
 >
-> You can find some basic documentation on creating your own components at [Developer site][esphome-dev].
+> You can find some basic documentation on creating your own components at
+> [ESPHome developer documentation][esphome-dev].
 
 ## Usage
 
-Add support for custom components into your YAML configuration using
+Add support for **Custom Components** into your YAML configuration using
 the [external components][esphome-docs-external-components] feature:
 
 ```yaml
@@ -42,6 +43,10 @@ This documentation is a modified copy extracted from the [ESPHome-Docs][github-e
 - [Custom Output](docs/custom-output.md)
 - [Custom Switch](docs/custom-switch.md)
 - [Custom Text Sensor](docs/custom-text-sensor.md)
+
+---
+
+Don't forget to **star the repository** if you found it useful! ⭐
 
 [github-esphome]: https://github.com/esphome/esphome/
 [github-esphome-docs]: https://github.com/esphome/esphome-docs/
