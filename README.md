@@ -3,8 +3,11 @@
 Brings back support for `custom` and `custom_component` to ESPHome after removing **Custom Components** from ESPHome in
 the 2025.2.0 release.
 
-The **Custom Components** code hosted in this repository is a copy extracted from the [ESPHome][github-esphome] 2024.12.4
-release.
+The **Custom Components** code hosted in this repository is a copy extracted from the [ESPHome][github-esphome]
+2024.12.4 release.
+
+#### Changes:
+  - Update components to use *_schema(...) to support [breaking change in ESPHome 2025.11.0][esphome-dev-blog-schema]
 
 ⓘ The code will be updated as needed to support new releases of the ESPHome.
 
@@ -50,5 +53,6 @@ Don't forget to **star the repository** if you found it useful! ⭐
 
 [github-esphome]: https://github.com/esphome/esphome/
 [github-esphome-docs]: https://github.com/esphome/esphome-docs/
-[esphome-dev]: https://developers.esphome.io
 [esphome-docs-external-components]: https://esphome.io/components/external_components/
+[esphome-dev]: https://developers.esphome.io
+[esphome-dev-blog-schema]: https://developers.esphome.io/blog/2025/05/14/_schema-deprecations/
